@@ -1,0 +1,31 @@
+<?php
+require_once __DIR__ . '/../common/dbConnect.php';
+    function getAllProducts(){
+        global $conn;
+        $stmt = $conn->prepare("SELECT* FROM PRODUCTS ORDER BY id");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    function getProductById($id){
+        global $conn;
+        $stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    function addProduct($name, $price, $quantity){
+        global $conn;
+        $stmt = $conn->prepare("INSERT INTO products (name, price, quantity) VALUE (:name, :price, :quantity)");
+        $stmt->execute(['name' => $name, 'price' => $price, 'quantity' => $quantity]);
+    }
+    function updateProduct($id, $name, $price, $quantity){
+        global $conn;
+        $stmt = $conn->prepare("UPDATE products SET name = :name, price = :price, quantity = :quantity WHERE id = :id");
+        return $stmt->execute(['id' => $id, 'name' => $name, 'price' => $price, 'quantity' => $quantity]);
+
+    }
+    function deleteProduct($id){
+        global $conn;
+        $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
+        return $stmt ->execute(['id' => $id]);
+    }
+?>
