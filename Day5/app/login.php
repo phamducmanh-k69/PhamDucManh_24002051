@@ -32,5 +32,6 @@ if($errors !== ''){
     Tên đăng nhập: <input type="text" name = "username" value="<?= htmlspecialchars($username) ?>"><br><br>
     Mật khẩu: <input type="password" name="password"><br><br>
     <button type="submit"> Đăng nhập </button>
+    <p> Chưa có tài khoản ?<a href="register.php">Đăng ký</a></p>
 </form>
 <?php include 'view/footer.php'; ?>
