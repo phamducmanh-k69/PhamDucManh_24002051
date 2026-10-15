@@ -1,5 +1,4 @@
 <?php
-// đang có vấn đề
 require_once 'common/auth.php';
 require_once 'model/product.php';
 include 'view/header.php';
