@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = ""; // Cần để trống nếu chạy trên XAMPP
+$password = ""; // Cần để trống nếu chạy trên DB của XAMPP
 $dbname = "shopping_cart";
 try {
     $conn = new PDO("mysql:host=$servername; dbname=$dbname; charset=utf8mb4", $username, $password);
