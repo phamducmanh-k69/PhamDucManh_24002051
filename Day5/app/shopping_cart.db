@@ -1,0 +1,17 @@
+CREATE DATABASE shopping_cart;
+use shopping_cart;
+CREATE TABLE products(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL
+);
+INSERT INTO products (name, price, quantity) VALUES
+('iPhone 15 Pro', 12000000, 2),
+('MacBook Air M3', 15000000, 1),
+('Sony WH-1000XM5', 3500000, 3),
+('RTX Series', 20000000, 3),
+('Tai nghe AirPods Pro', 550000, 2),
+('Sạc dự phòng Anker', 850000, 3),
+('Dell XPS 13', 6990000, 5),
+('Tai nghe có dây KKV', 79000, 10);
