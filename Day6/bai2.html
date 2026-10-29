@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt vé xem phim</title>
+     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], select, input[type="number"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .radio-group, .checkbox-group { display: flex; gap: 15px; align-items: center; }
+        .quantity-control { display: flex; gap: 5px; align-items: center; }
+        .quantity-control button { padding: 5px 15px; font-weight: bold; cursor: pointer; }
+        .btn-submit { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .btn-submit:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-reset { width: 100%; padding: 8px; background-color: #dc3545; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 5px; }
+        .result-box { margin-top: 20px; padding: 15px; background-color: #e2f0d9; border-left: 5px solid #385723; border-radius: 4px; }
+        .error { color: red; font-size: 13px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <h2>Đặt vé xem phim</h2>
+    <form @submit.prevent="handleSubmit">
+        <div class="form-group">
+            <label for="fullName">Họ tên khách hàng:</label>
+            <input type="text" id="fullName" v-model.trim="booking.fullName" placeholder="Nhập đầy đủ họ tên">
+        </div>
+        <div class="form-group">
+            <label for="showTime">Chọn suất chiếu:</label>
+            <select id="showTime" v-model="booking.showTime">
+                <option value="14:00">14:00 - Chiều</option>
+                <option value="18:30">18:30 - Tối</option>
+                <option value="21:15">21:15 - Đêm</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Loại vé:</label>
+            <div class="radio-group">
+                <label><input type="radio" value="70000" v-model="booking.ticketType">Vé thường - 70.000</label>
+                <label><input type="radio" value="100000" v-model="booking.ticketType">Vé VIP - 100.000</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Số lượng vé (1 - 10):</label>
+            <div class="quantity-control">
+                <button type="button" @click="decreaseQty">-</button>
+                <input type="number" id="quantity" v-model.number="booking.quantity">
+                <button type="button" @click="increaseQty">+</button>
+            </div>
+            <p v-if="!isQuantityValid" class="error">Số lượng phải từ 1 đến 10.</p>
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" v-model="booking.hasCombo"> Chọn combo bắp nước (45.000)
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <h3>Tạm tính: {{ formatCurrency(totalAmount) }}</h3>
+        </div>
+
+        <button type="submit" class="btn-submit" :disabled="!isFormValid">Đặt vé</button>
+        <button type="button" class="btn-reset" @click="resetForm">Đặt lại</button>
+    </form>
+    <div v-if="confirmedBooking" class="result-box">
+        <h3>Đặt vé thành công!</h3>
+        <p><strong>Khách hàng:</strong>{{ confirmedBooking.fullName }}</p>
+        <p><strong>Suất chiếu:</strong> {{ confirmedBooking.showTime }}</p>
+        <p><strong>Loại vé:</strong> {{ confirmedBooking.ticketType === '100000' ? 'Vé VIP' : 'Vé thường' }}</p>
+        <p><strong>Số lượng:</strong> {{ confirmedBooking.quantity }} vé</p>
+        <p><strong>Dịch vụ kèm theo:</strong> {{ confirmedBooking.hasCombo ? 'Combo bắp nước' : 'Không' }}</p>
+        <hr>
+        <h4>Tổng tiền thanh toán: {{ formatCurrency(confirmedBooking.total) }}</h4>
+    </div>
+</div>
+<script>
+    const { createApp } = Vue
+    createApp({
+        data() {
+            return {
+                booking: {
+                    fullName: '',
+                    showTime: '14:00',
+                    ticketType: '70000',
+                    quantity: 1,
+                    hasCombo: false
+                },
+                confirmedBooking: null
+            }
+        },
+        computed: {
+            isQuantityValid() {
+                const qty = this.booking.quantity;
+                return Number.isInteger(qty) && qty >= 1 && qty <= 10;
+            },
+            isFormValid() {
+                return this.booking.fullName !== '' &&
+                       this.isQuantityValid;
+            },
+            totalAmount() {
+                if (!this.isQuantityValid) return 0;
+                const ticketPrice = parseInt(this.booking.ticketType);
+                const comboPrice = this.booking.hasCombo ? 45000 : 0;
+                return (ticketPrice * this.booking.quantity) + comboPrice;
+            }
+        },
+        methods: {
+            increaseQty(){
+                if (this.booking.quantity < 10){
+                    this.booking.quantity++;
+                }
+            },
+            decreaseQty(){
+                if (this.booking.quantity > 1){
+                    this.booking.quantity--;
+                }
+            },
+            resetForm(){
+                this.booking.fullName = '';
+                this.booking.showTime = '14:00';
+                this.booking.ticketType = '70000';
+                this.booking.quantity = 1;
+                this.booking.hasCombo = false;
+                this.confirmedBooking = null;
+            },
+            handleSubmit(){
+                if (this.isFormValid){
+                    this.confirmedBooking = {
+                        ...this.booking,
+                        total: this.totalAmount
+                    };
+                }
+            },
+            formatCurrency(value){
+                return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(value);
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài thực hành</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .student-card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            width: 300px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .color-gioi{ color: green; font-weight: bold;}
+        .color-kha{ color: blue; font-weight: bold;}
+        .color-tb{ color: orange; font-weight: bold;}
+        .color-yeu{ color: red; font-weight: bold;}
+        .intro-box {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 3px solid #007BFF;
+        }
+        button {
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="student-card">
+        <img class="avatar" src="anhDaidien" :alt="'Ảnh đại diện ' + hoTen">
+        <h2>{{ hoTen }}</h2>
+        <p>Mã sinh viên: {{ maSinhVien }}</p>
+        <p>Lớp: <span v-text="lop"></span></p>
+        <p>Điểm trung bình: {{ diemTrungBinh }}</p>
+
+        <p>Xếp loại:
+            <span v-if="diemTrungBinh >= 8" :class="'color-gioi'">Giỏi</span>
+            <span v-else-if="diemTrungBinh >= 6.5" :class="'color-kha'">Khá</span>
+            <span v-else-if="diemTrungBinh >= 5" :class="'color-tb'">Trung bình</span>
+            <span v-else :class="'color-yeu'">Chưa đạt</span>
+        </p>
+        
+        <p>Trạng thái
+            <span v-if="dangHoc">Đang học</span>
+            <span v-else>Đã nghỉ</span>
+        </p>
+
+        <button @click="hienGioiThieu = !hienGioiThieu">Bật/tắt giới thiệu</button>
+        <div class="intro-box" v-show="hienGioiThieu">
+            Xin chào, tôi tên là {{ hoTen }}, sinh viên lớp {{ lop }}
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue
+        createApp({
+            data() {
+                return {
+                    maSinhVien: 'SV001',
+                    hoTen: 'Nguyễn Văn A',
+                    lop: 'KHMT&TT',
+                    anhDaidien: 'img/images.png',
+                    diemTrungBinh: 5,
+                    dangHoc: true,
+                    hienGioiThieu: true
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
