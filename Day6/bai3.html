@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý công việc cá nhân</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .add-row { display: flex; gap: 8px; }
+        .add-row input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 12px; cursor: pointer; }
+        .filters { margin: 15px 0; display: flex; gap: 8px; }
+        .filters button.active { background-color: #007BFF; color: white; }
+        ul { list-style: none; padding: 0; }
+        li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        li span { flex: 1; }
+        .done { text-decoration: line-through; color: #888; }
+        .empty { color: #888; font-style: italic; }
+        .summary { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h2>Quản lý công việc cá nhân</h2>
+
+        <div class="add-row">
+            <input type="text" v-model="newTask" @keyup.enter="addTask" placeholder="Nhập tên công việc">
+            <button type="button" @click="addTask">Thêm</button>
+        </div>
+
+        <div class="filters">
+            <button type="button" :class="{ active: filter === 'all' }" @click="filter = 'all'">Tất cả</button>
+            <button type="button" :class="{ active: filter === 'active' }" @click="filter = 'active'">Chưa hoàn thành</button>
+            <button type="button" :class="{ active: filter === 'completed' }" @click="filter = 'completed'">Đã hoàn thành</button>
+        </div>
+        <ul v-if="filteredTask.length > 0">
+            <li v-for="task in filteredTask" :key="task.id">
+                <input type="checkbox" v-model="task.done">
+                <span :class="{ done: task.done }">{{ task.title }}</span>
+                <button type="button" @click="removeTask(task.id)">Xoá</button>
+            </li>
+        </ul>
+        <p v-else-if="tasks.length === 0" class="empty">Chưa có công việc nào. Hãy thêm công việc mới</p>
+        <p v-else class="empty">Không có công việc nào phù hợp</p>
+        <p class="summary">Tổng số công việc: {{ totalCount }} | Chưa hoàn thành: {{ remainingCount }}</p>
+        <button type="button" @click="clearCompleted">Xoá các việc đã hoàn thành</button>
+    </div>
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data(){
+            return {
+                tasks: [
+                    {id: 1, title: 'Học Vue.js', done: false},
+                    {id: 2, title: 'Làm bài thực hành', done: true},
+                    {id: 3, title: 'Đưa lên Github', done: false}
+                ],
+                newTask: '',
+                filter: 'all',
+                nextId: 4
+            };
+        },
+        computed: {
+            totalCount() {
+                return this.tasks.length;
+            },
+            remainingCount() {
+                return this.tasks.filter(task => !task.done).length;
+            },
+            filteredTask() {
+                if (this.filter === 'active'){
+                    return this.tasks.filter(task => !task.done);
+                }
+                if (this.filter === 'completed'){
+                    return this.tasks.filter(task => task.done);
+                }
+                return this.tasks;
+            }
+        },
+        methods: {
+            addTask() {
+                const title = this.newTask.trim();
+                if (title === '') return;
+                this.tasks.push({ id: this.nextId++, title: title, done: false});
+                this.newTask = '';
+            },
+            removeTask(id) {
+                this.tasks = this.tasks.filter(task => task.id !== id);
+            },
+            clearCompleted() {
+                this.tasks = this.tasks.filter(task => !task.done);
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
