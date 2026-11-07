@@ -38,7 +38,7 @@
 </head>
 <body>
     <div id="app" class="student-card">
-        <img class="avatar" src="anhDaidien" :alt="'Ảnh đại diện ' + hoTen">
+        <img class="avatar" :src="anhDaidien" :alt="'Ảnh đại diện ' + hoTen">
         <h2>{{ hoTen }}</h2>
         <p>Mã sinh viên: {{ maSinhVien }}</p>
         <p>Lớp: <span v-text="lop"></span></p>
