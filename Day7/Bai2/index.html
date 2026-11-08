@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .product-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; align-items: start; }
+        
+        /* CSS cho component con <the-san-pham> */
+        .product-card { background: white; border: 1px solid #e1e4e8; border-radius: 8px; width: 220px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .product-img { width: 100%; height: 180px; object-fit: cover; }
+        .product-info { padding: 15px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .product-info h3 { margin: 0; font-size: 16px; color: #333; }
+        .price { color: #d9381e; font-weight: bold; margin: 0; }
+        .out-of-stock-label { color: #d9381e; font-weight: bold; font-size: 13px; background: #fce8e6; padding: 4px; border-radius: 4px; text-align: center; }
+        .description-box { font-size: 13px; color: #666; background: #f8f9fa; padding: 8px; border-left: 3px solid #007bff; border-radius: 4px; }
+        .btn { padding: 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-info { background: #e1e4e8; color: #333; }
+        .btn-buy { background: #28a745; color: white; margin-top: auto; }
+        .btn-buy:disabled { background: #cccccc; color: #666; cursor: not-allowed; }
+
+
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <h2>Danh mục sản phẩm</h2>
+    <div class="product-grid">
+        <the-san-pham v-for="sp in danhSachSanPham" :key="sp.id" :ten="sp.ten" :gia="sp.gia" :anh="sp.anh" :mo-ta="sp.moTa" :so-luong-ton="sp.soLuongTon"></the-san-pham>
+    </div>
+</div>
+    <!-- cấu trúc modul nạp file bên ngoài-->
+<script type="module">
+    import TheSanPham from './components/TheSanPham.js';
+    const { createApp } = Vue;
+    createApp({
+        components: {
+            'the-san-pham' : TheSanPham
+        },
+        data() {
+            return {
+                danhSachSanPham: [
+                    { id: 1, ten: 'Điện thoại iPhone 15', gia: 22000000, anh: 'img/ip15.jpg', moTa: 'Màn hình Super Retina XDR, chip A16 Bionic cực mạnh.', soLuongTon: 10 },
+                    { id: 2, ten: 'Laptop Asus Zenbook', gia: 18500000, anh: 'img/laptop.jpg', moTa: 'Thiết kế mỏng nhẹ đẳng cấp, màn hình OLED chuẩn màu.', soLuongTon: 5 },
+                    { id: 3, ten: 'Bàn phím cơ AKKO', gia: 1500000, anh: 'img/akko.jpg', moTa: 'Sử dụng Akko switch v3 mượt mà, keycap PBT siêu bền.', soLuongTon: 0 }, // sản phẩm hết hàng
+                    { id: 4, ten: 'Chuột không dây Logitech', gia: 650000, anh: 'img/mouse.jpg', moTa: 'Pin bền bỉ lên tới 24 tháng, thiết kế công thái học chống mỏi tay.', soLuongTon: 12 },
+                    { id: 5, ten: 'Nồi cơm điện Toshiba', gia: 2100000, anh: 'img/cooker.jpg', moTa: 'Công nghệ cao tần IH giúp cơm chín đều, giữ trọn dưỡng chất.', soLuongTon: 8 },
+                    { id: 6, ten: 'Quạt cây Panasonic', gia: 1650000, anh: 'img/fan.jpg', moTa: 'Động cơ DC chạy êm ái, có điều khiển từ xa và chế độ hẹn giờ tiện lợi.', soLuongTon: 0 }, // Thêm 1 sản phẩm hết hàng để giao diện trực quan hơn
+                    { id: 7, ten: 'Áo khoác Bomber Nam', gia: 450000, anh: 'img/bomber.jpg', moTa: 'Chất vải kaki dày dặn 2 lớp, phong cách trẻ trung năng động.', soLuongTon: 35 },
+                    { id: 8, ten: 'Quần Jeans Slimfit', gia: 380000, anh: 'img/jean.jpg', moTa: 'Chất liệu jean co giãn nhẹ, không phai màu, tôn dáng người mặc.', soLuongTon: 20 }
+                ]
+
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
