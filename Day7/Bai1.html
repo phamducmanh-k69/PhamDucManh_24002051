@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách hàng</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333;}
+        .container {max-width: 1000px; margin: 0 auto; background:white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);}
+        h2, h3 {color: #0056b3;}
+        .controls {display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 6px;}
+        .controls input, .controls select, .form-group input, .form-group select{ padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;}
+        .controls input[type="text"] {flex: 1; min-width: 200px}
+
+        /*định dạng bảng*/
+        table {width: 100%; border-collapse: collapse; margin-top: 15px;}
+        th, td {border: 1px solid #dee2e6; padding: 12px; text-align: left;}
+        th {background-color: #007bff; color: white}
+        tr:nth-child(even) {background-color: #f2f2f2;}
+        /* nhãn trạng thái */
+        .badge {padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white;}
+        .badge-con{background-color: #28a745;}
+        .badge-het{background-color: #dc3545;}
+        /*thống kê và thông báo*/
+        .summary-box {display: flex; gap: 30px; margin-top: 20px; padding: 15px; background: #d4edda; border-left: 5px solid #28a745; border-radius: 4px;}
+        .alert-box {padding: 10px 15px; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 15px; font-weight: bold;}
+        .status-header {float: right; font-size: 14px; background: #6c757d; color: white; padding: 5px 10px; border-radius: 4px;}
+        /* form thêm mới*/
+        .add-form {margin-top: 30px; padding: 20px; border: 1px solid #ced4da; border-radius: 6px; background: #fff;}
+        .form-grid {display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;}
+        .form-grid input, .form-grid select {flex: 1; min-width: 150px;}
+        .btn {padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
+        .btn-add{ background-color: #28a745; color: white;}
+        .btn-del{background-color: #dc3545; color: white; padding: 4px 8px; font-size: 13px;}
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <!-- Hiển thị trạng thái trang được đặt bằng mounted()-->
+     <div class="status-header">Trạng thái hệ thống: {{ systemStatus }}</div>
+     <h2>Quản lý danh sách sản phẩm</h2>
+
+     <!--hiển thị hoặc ẩn cảnh báo dựa trên độ dài từ khoá-->
+     <div v-if="alertMessage" class="alert-box">
+        {{ alertMessage }}
+     </div>
+
+     <!-- bộ lọc kết hợp-->
+     <div class="controls">
+        <!-- tìm theo tên-->
+         <input type="text" v-model="filterName" placeholder="Tìm theo tên sản phẩm ">
+         
+         <!--lọc theo danh mục-->
+         <select v-model="filterCategory">
+            <option value="">Tất cả danh mục</option>
+            <option v-for="ca in categories" :key="ca" :value="ca">{{ ca }}</option>
+         </select>
+
+         <!-- sắp xếp giá -->
+          <select v-model="sortOrder">
+            <option value="none">Không sắp xếp</option>
+            <option value="asc">Giá tăng dần</option>
+            <option value="desc">Giá giảm dần</option>
+          </select>
+     </div>
+
+     <!-- bảng danh sách sản phẩm -->
+      <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá bán</th>
+                <th>Số lượng tồn</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- sử dụng mảng đã qua xử lý kết hợp-->
+             <tr v-for="item in filteredAndSortedProducts" :key="item.id">
+                <td>{{ item.id }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.category }}</td>
+                <td>{{ formatCurrency(item.price) }}</td>
+                <td>{{ item.stock }}</td>
+                <td>
+                    <!--nhãn màu khác nhau theo lượng tồn kho-->
+                    <span v-if="item.stock > 0" class="badge badge-con">Còn hàng</span>
+                    <span v-else class="badge badge-het">Hết hàng</span>
+                </td>
+                <td>
+                    <!-- xoá sản phẩm sau khi xác nhận-->
+                     <button class="btn btn-del" @click="deleteProduct(item)">Xoá</button>
+                </td>
+             </tr>
+                <tr v-if="filteredAndSortedProducts.length === 0">
+                    <td colspan="7" style="text-align: center; color: #888; font-style: italic;">
+                        Không tìm thấy sản phẩm phù hợp.
+                    </td>
+                </tr>
+        </tbody>
+      </table>
+
+      <!-- khối thống kê tự động cập nhật khớp với bộ lọc-->
+       <div class="summary-box">
+        <div><strong>Số lượng hiển thị:</strong> {{ filteredAndSortedProducts.length }} / {{ products.length }}</div>
+        <div><strong>Tổng giá trị tồn kho:</strong> {{ formatCurrency(totalStockValue) }}</div>
+       </div>
+
+       <!-- form thêm sản phẩm mới-->
+        <div class="add-form">
+            <h3>Thêm sản phẩm mới</h3>
+            <form @submit.prevent="addProduct">
+                <div class="form-grid">
+                    <input type="text" v-model.trim="newProduct.name" placeholder="Tên sản phẩm không rỗng" required>
+                    <select v-model="newProduct.category">
+                        <option value="Điện tử">Điện tử</option>
+                        <option value="Thời trang">Thời trang</option>
+                        <option value="Gia dụng">Gia dụng</option>
+                    </select>
+                    <input type="number" v-model.number="newProduct.price" placeholder="Giá bán (> 0)" min="1" required>
+                    <input type="number" v-model.number="newProduct.stock" placeholder="Số lượng tồn (>= 0)" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-add">+ Thêm sản phẩm</button>
+            </form>
+        </div>
+</div>
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                systemStatus: "Sẵn sàng",
+                alertMessage: "",
+                filterName: "",
+                filterCategory: "",
+                sortOrder: "none",
+                categories: ["Điện tử", "Thời trang", "Gia dụng"],
+                products: [
+                    { id: 1, name: "Điện thoại iPhone 15", category: "Điện tử", price: 22000000, stock: 15 },
+                    { id: 2, name: "Laptop Asus Zenbook", category: "Điện tử", price: 18500000, stock: 0 },
+                    { id: 3, name: "Áo khoác Bomber Nam", category: "Thời trang", price: 450000, stock: 40 },
+                    { id: 4, name: "Quần Jeans Slimfit", category: "Thời trang", price: 320000, stock: 25 },
+                    { id: 5, name: "Nồi cơm điện Toshiba", category: "Gia dụng", price: 1200000, stock: 8 },
+                    { id: 6, name: "Quạt cây Panasonic", category: "Gia dụng", price: 950000, stock: 0 }
+                ],
+                newProduct: {
+                    name: "",
+                    category: "Điện tử",
+                    price: null,
+                    stock: 0
+                }
+            }
+        },
+        computed: {
+            filteredAndSortedProducts() {
+                // tạo bản sao dữ liệu gốc
+                let result = [...this.products];
+                if (this.filterName) {
+                    const searchKey = this.filterName.toLowerCase();
+                    result = result.filter(p => p.name.toLowerCase().includes(searchKey));
+                }
+                if (this.filterCategory) {
+                    result = result.filter(p => p.category === this.filterCategory);
+                }
+                if (this.sortOrder === "asc"){
+                    result = result.sort((a, b) => a.price - b.price);
+                } else if (this.sortOrder === "desc") {
+                    result = result.sort((a, b) => b.price - a.price);
+                }
+                return result;
+            },
+            totalStockValue() {
+                return this.filteredAndSortedProducts.reduce((sum, item) => {
+                    return sum + (item.price * item.stock);
+                }, 0);
+            }
+        },
+        watch: {
+            filterName(newVal) {
+                const len = newVal.length;
+                if (len === 1) {
+                    this.alertMessage = "Nhập thêm ký tự để tìm kiếm chính xác hơn.";
+                } else if (len === 0 || len >= 2){
+                    this.alertMessage = "";
+                }
+            }
+        },
+        mounted() {
+            this.systemStatus="Sẵn sàng";
+        },
+        methods: {
+            addProduct() {
+                const {name, price, stock, category} = this.newProduct;
+                if (!name || name.trim() === "") return;
+                if (price <= 0 || !Number.isInteger(stock) || stock < 0) {
+                    alert("Dữ liệu nhập vào không hợp lệ!");
+                    return;
+                }
+                const nextId = this.products.length > 0 ? Math.max(...this.products.map(p => p.id))+1 : 1;
+                this.products.push({
+                    id: nextId,
+                    name: name,
+                    category: category,
+                    price: price,
+                    stock: stock
+                });
+                this.newProduct.name = "";
+                this.newProduct.price= null;
+                this.newProduct.stock= 0;
+            },
+            deleteProduct(item) {
+                const confirmDelete = confirm(`Are you sure "${item.name}"`);
+                if (confirmDelete){
+                    this.products = this.products.filter(p => p.id !== item.id);
+                }
+            },
+            formatCurrency(value) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND'}).format(value);
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
