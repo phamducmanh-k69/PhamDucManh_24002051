@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
 $host = 'localhost';
 $dbname = 'product';
 $username = 'root';
-$password = 'Cailamvai24!';
+$password = '';
 try {
     $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
     $pdo = new PDO($dsn, $username, $password, [
